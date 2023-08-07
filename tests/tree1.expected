@@ -1,0 +1,14 @@
+/home/jas
+    mail.txt
+    todo.txt
+---
+/
+    bin
+        ls
+        pwd
+    hello.txt
+    home
+        jas
+            mail.txt
+            todo.txt
+    world.txt

@@ -1,0 +1,2 @@
+cd: 'hello': Not a directory
+cd: 'hello/world': Not a directory

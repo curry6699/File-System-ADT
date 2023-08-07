@@ -1,0 +1,3 @@
+cat: 'hello': Is a directory
+cat: '.': Is a directory
+cat: '/': Is a directory

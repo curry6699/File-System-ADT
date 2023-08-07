@@ -1,0 +1,3 @@
+put: 'hello': Is a directory
+put: '.': Is a directory
+put: '/': Is a directory

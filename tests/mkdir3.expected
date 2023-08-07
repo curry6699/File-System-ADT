@@ -1,0 +1,8 @@
+/
+    hello.txt
+mkdir: cannot create directory 'hello.txt/world': Not a directory
+mkdir: cannot create directory 'html/index.html/hi': Not a directory
+/
+    hello.txt
+    html
+        index.html

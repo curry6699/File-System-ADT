@@ -1,0 +1,2 @@
+mkfile: cannot create file '.': File exists
+mkfile: cannot create file '..': File exists

@@ -1,0 +1,4 @@
+dldir: failed to remove 'hello': Directory not empty
+/
+    hello
+        world

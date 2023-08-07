@@ -1,0 +1,2 @@
+ls: cannot access 'hello/world': Not a directory
+ls: cannot access 'hello/.': Not a directory

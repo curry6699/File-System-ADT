@@ -1,0 +1,6 @@
+/
+    bin
+        mkdir
+        mkfile
+    hello.c
+    world.c

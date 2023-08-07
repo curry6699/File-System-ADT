@@ -1,0 +1,8 @@
+/
+    hello
+mkfile: cannot create file 'hello/world': Not a directory
+mkfile: cannot create file 'html/index.html/hi': Not a directory
+/
+    hello
+    html
+        index.html

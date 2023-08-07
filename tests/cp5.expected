@@ -1,0 +1,11 @@
+/
+    hello
+        a.txt
+    world
+---
+/
+    hello
+        a.txt
+    world
+        hello
+            a.txt

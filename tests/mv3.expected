@@ -1,0 +1,9 @@
+/
+    hello.txt
+    world
+---
+/
+    world
+        hello.txt
+---
+hello

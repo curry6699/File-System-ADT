@@ -1,0 +1,9 @@
+/
+    hello.txt
+    world
+---
+/
+    hello.txt
+    world
+---
+cat: 'world/hello.txt': No such file or directory

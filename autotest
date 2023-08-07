@@ -1,0 +1,144 @@
+#!/bin/sh
+
+# DEFINES AND GLOBALS
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+passed=0
+failed=0
+not_run=0
+num=0
+LEAK_CHECK=0
+
+# FUNCTIONS
+
+print_reproduce () {
+	echo "You can reproduce this test by executing these commands:"
+	echo -e "${BLUE}  gcc -Wall -Werror -g -o testFs tests/$t.c Fs.c utility.c listFile.c${NC}"
+	if [ ${LEAK_CHECK} -eq 1 ]; then
+		echo -e "${BLUE}  valgrind -q --leak-check=full ./testFs${NC}"
+	else
+		echo -e "${BLUE}  ./testFs${NC}"
+	fi
+}
+
+# MAIN SCRIPT
+
+# Determine whether or not to leak check
+while getopts l flag
+do
+    case "${flag}" in
+        l) LEAK_CHECK=1;
+    esac
+done
+
+# ADD YOUR TESTS BELOW
+testlist=(getcwd1 mkdir1 mkdir2 mkdir3 mkdir4 mkdir5 mkfile1 mkfile2 mkfile3 mkfile4 mkfile5 cd1 cd2 cd3 cd4 cd5 ls1 ls2 ls3 ls4 ls5 pwd1 pwd2 tree1 tree2 tree3 put1 put2 put3 put4 put5 cat1 cat2 cat3 cat4 dldir1 dldir2 dldir3 dldir4 dl1 dl2 dl3 dl4 cp1 cp2 cp3 cp4 cp5)
+# ADD YOUR TESTS ABOVE
+
+# Determine which tests to run
+# Run all by default
+if [[ $# -ne 0 && ${LEAK_CHECK} -eq 0 ]]; then
+	testlist=("${@:1:$#}")
+fi
+# if -l flag exists, skip over it
+if [[ $# -ne 1 && ${LEAK_CHECK} -eq 1 ]]; then
+	testlist=("${@:2:$#}")
+fi
+
+for t in "${testlist[@]}"
+do
+	# If no tests exists, 
+	if [ ! -e tests/$t.c ]; then
+		echo -e "Test $num ($t) - ${RED}test could not be run${NC} (not found)"
+		not_run=$((not_run + 1))
+		num=$((num + 1))
+		continue
+	fi
+
+	# Compile
+    script -q --return -c "gcc -Wall -Werror -g -o testFs tests/$t.c Fs.c utility.c listFile.c" tests/gcc_output.txt > /dev/null
+	if [ $? -ne 0 ]; then
+		# If error occured in compiling, test not run
+		echo -e "Test $num ($t) - ${RED}test could not be run${NC} (gcc error)"
+		cat tests/gcc_output.txt
+		echo ""
+
+		print_reproduce
+		
+		not_run=$((not_run + 1))
+		num=$((num + 1))
+		continue
+	fi
+
+	# Run command
+	if [ ${LEAK_CHECK} -eq 1 ]; then
+		ERROR=$(valgrind -q --leak-check=full ./testFs 2>&1 > tests/$t.observed)
+	else
+		ERROR=$(valgrind -q ./testFs 2>&1 > tests/$t.observed)
+	fi
+	run_error=$?
+
+	if [ "$ERROR" != "" ]; then
+		# If error occured in compiling, failed
+		echo -e -n "Test $num ($t) - ${RED}failed${NC} "
+		if [ $run_error -ne 0 ]; then
+			echo "(Runtime error)"
+		else 
+			echo "(Memory leak)"
+		fi
+		echo "${ERROR}"
+		echo ""
+
+		print_reproduce
+
+		echo "For a more detailed breakdown of this runtime error you may wish to use"
+		echo -e "${BLUE}  dcc -o testFs tests/$t.c Fs.c utility.c listFile.c${NC}"
+		echo -e "${BLUE}  ./testFs${NC}"
+
+		
+		failed=$((failed + 1))
+		num=$((num + 1))
+		continue
+	fi
+
+	# No errors, compare outputs
+	if diff -Z tests/$t.expected tests/$t.observed > /dev/null; then
+		echo -e "Test $num ($t) - ${GREEN}passed${NC}"
+		passed=$((passed + 1))
+		rm -f tests/$t.observed
+	else
+		echo -e "Test $num ($t) - ${RED}failed${NC} (Incorrect output)"
+
+		echo "Your program produces these $(cat tests/$t.observed | wc -l) lines of output:"
+		echo -e "${RED}$(cat tests/$t.observed)${NC}\n"
+		echo ""
+
+		echo "The correct $(cat tests/$t.expected | wc -l) lines of output are:"
+		echo -e "${GREEN}$(cat tests/$t.expected)${NC}"
+		echo ""
+
+		print_reproduce
+
+		failed=$((failed + 1))
+	fi
+
+	rm -f testFs
+    num=$((num + 1))
+done
+
+# Tally passes and fails
+if [[ $passed -eq 0 && $not_run -eq 0 ]]; then
+	echo -e -n "${RED}$passed tests passed $failed tests failed${NC}"
+elif [[ $failed -eq 0 && $not_run -eq 0 ]]; then
+	echo -e -n "${GREEN}$passed tests passed $failed tests failed${NC}"
+else
+	echo -e -n "${GREEN}$passed tests passed ${RED}$failed tests failed${NC}"
+fi
+
+if [ $not_run -eq 0 ]; then
+	echo ""
+else 
+	echo -e "  ${not_run} tests could not be run"
+fi
